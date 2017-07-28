@@ -2,17 +2,21 @@ package de.metro.robocod;
 
 import java.awt.Color;
 import java.util.HashMap;
+import java.util.Random;
 import robocode.*;
 import robocode.util.Utils;
 
 public class RustyTrumpet extends AdvancedRobot {
 
+    Random rand = new Random();
     static final int SCAN = 0, SEEK = 1, SURROUND = 2;
     int count = 0; // Keeps track of how long we've
     int state = SCAN;
     double gunTurnAmt; // How much to turn our gun when searching
     String trackName; // Name of the robot we're currently tracking
+    boolean movingForward = true;
     HashMap<String, Double> dujmanii;
+
     /**
      * run: Rusty's main run function
      */
@@ -28,27 +32,27 @@ public class RustyTrumpet extends AdvancedRobot {
         while (true) {
             switch (state) {
                 case SCAN:
-                    if(dujmanii.size() == getOthers()){
-                        setStop(true);
-                        state = SEEK;
+                    if (dujmanii.size() == getOthers()) {
+                        //setStop(true);
+                        //state = SEEK;
                     } else {
-                        setTurnRadarLeft(360);
+                        setTurnRadarLeft(7);
                     }
-                    
+
                     happyFeet();
                     break;
             }
-            
+
             execute();
         }
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
-        switch(state){
+        switch (state) {
             case SCAN:
                 dujmanii.put(e.getName(), e.getDistance());
                 return;
-            
+
         }
         double radarTurn
                 = // Absolute bearing to target
@@ -94,7 +98,39 @@ public class RustyTrumpet extends AdvancedRobot {
 
     private void happyFeet() {
         double x = getX(),
-                y = getY();
+                y = getY(),
+                maxX = getBattleFieldWidth(),
+                maxY = getBattleFieldHeight();
+
+        setAhead(Double.MAX_VALUE);
+        // Tell the game we will want to turn right 90
+        boolean turnDir = rand.nextBoolean();
+
+        if (getTurnRemaining() == 0) {
+            if (turnDir) {
+                setTurnRight(rand.nextInt(80) + 40);
+            } else {
+                setTurnLeft(rand.nextInt(80) + 40);
+            }
+        }
+    }
+
+    public void onHitWall(HitWallEvent e) {
+        // Bounce off!
+        reverseDirection();
+    }
+
+    /**
+     * reverseDirection: Switch from ahead to back & vice versa
+     */
+    public void reverseDirection() {
+        if (movingForward) {
+            setBack(40000);
+            movingForward = false;
+        } else {
+            setAhead(40000);
+            movingForward = true;
+        }
     }
 
 }
