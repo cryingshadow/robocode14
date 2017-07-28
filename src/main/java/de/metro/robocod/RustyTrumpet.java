@@ -27,7 +27,9 @@ public class RustyTrumpet extends AdvancedRobot {
         setGunColor(Color.YELLOW);
         setRadarColor(Color.ORANGE);
         setScanColor(Color.ORANGE);
-        setBulletColor(Color.RED);
+        setBulletColor(Color.WHITE);
+        setAdjustRadarForGunTurn(false);
+        setAdjustGunForRobotTurn(true);
 
         while (true) {
             switch (state) {
@@ -36,7 +38,7 @@ public class RustyTrumpet extends AdvancedRobot {
                         //setStop(true);
                         //state = SEEK;
                     } else {
-                        setTurnRadarLeft(7);
+                        setTurnGunLeft(360);
                     }
 
                     happyFeet();
@@ -47,20 +49,22 @@ public class RustyTrumpet extends AdvancedRobot {
         }
     }
 
+    @Override
     public void onScannedRobot(ScannedRobotEvent e) {
-        switch (state) {
+        /*switch (state) {
             case SCAN:
                 dujmanii.put(e.getName(), e.getDistance());
                 return;
 
-        }
+        }*/
         double radarTurn
                 = // Absolute bearing to target
                 getHeadingRadians() + e.getBearingRadians()
                 // Subtract current radar heading to get turn required
                 - getRadarHeadingRadians();
 
-        setTurnRadarRightRadians(Utils.normalRelativeAngle(radarTurn));
+        setTurnGunRightRadians(Utils.normalRelativeAngle(radarTurn));
+        setFire(1);
 
         // ...
     }
@@ -115,22 +119,11 @@ public class RustyTrumpet extends AdvancedRobot {
         }
     }
 
+    @Override
     public void onHitWall(HitWallEvent e) {
         // Bounce off!
-        reverseDirection();
+        setTurnRight(90);
     }
 
-    /**
-     * reverseDirection: Switch from ahead to back & vice versa
-     */
-    public void reverseDirection() {
-        if (movingForward) {
-            setBack(40000);
-            movingForward = false;
-        } else {
-            setAhead(40000);
-            movingForward = true;
-        }
-    }
 
 }
