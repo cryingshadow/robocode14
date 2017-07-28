@@ -1,103 +1,68 @@
 package de.metro.robocod;
 
 import java.awt.Color;
+import java.util.HashMap;
 import robocode.*;
-import static robocode.util.Utils.normalRelativeAngleDegrees;
+import robocode.util.Utils;
 
 public class RustyTrumpet extends AdvancedRobot {
 
+    static final int SCAN = 0, SEEK = 1, SURROUND = 2;
     int count = 0; // Keeps track of how long we've
-    // been searching for our target
+    int state = SCAN;
     double gunTurnAmt; // How much to turn our gun when searching
     String trackName; // Name of the robot we're currently tracking
-
+    HashMap<String, Double> dujmanii;
     /**
-     * run: Tracker's main run function
+     * run: Rusty's main run function
      */
     @Override
     public void run() {
-        // Set colors
+        dujmanii = new HashMap<String, Double>(super.getOthers());
         setBodyColor(new Color(218, 165, 32));
         setGunColor(Color.YELLOW);
         setRadarColor(Color.ORANGE);
         setScanColor(Color.ORANGE);
         setBulletColor(Color.RED);
 
-        // Prepare gun
-        trackName = null; // Initialize to not tracking anyone
-        setAdjustGunForRobotTurn(true); // Keep the gun still when we turn
-        gunTurnAmt = 10; // Initialize gunTurn to 10
-
-        // Loop forever
         while (true) {
-            // turn the Gun (looks for enemy)
-            turnGunRight(gunTurnAmt);
-            // Keep track of how long we've been looking
-            count++;
-            // If we've haven't seen our target for 2 turns, look left
-            if (count > 2) {
-                gunTurnAmt = -10;
+            switch (state) {
+                case SCAN:
+                    if(dujmanii.size() == getOthers()){
+                        setStop(true);
+                        state = SEEK;
+                    } else {
+                        setTurnRadarLeft(360);
+                    }
+                    break;
             }
-            // If we still haven't seen our target for 5 turns, look right
-            if (count > 5) {
-                gunTurnAmt = 10;
-            }
-            // If we *still* haven't seen our target after 10 turns, find another target
-            if (count > 11) {
-                trackName = null;
-            }
+            
+            execute();
         }
     }
 
-    /**
-     * onScannedRobot: Here's the good stuff
-     */
     public void onScannedRobot(ScannedRobotEvent e) {
-
-        // If we have a target, and this isn't it, return immediately
-        // so we can get more ScannedRobotEvents.
-        if (trackName != null && !e.getName().equals(trackName)) {
-            return;
+        switch(state){
+            case SCAN:
+                dujmanii.put(e.getName(), e.getDistance());
+                return;
+            
         }
+        double radarTurn
+                = // Absolute bearing to target
+                getHeadingRadians() + e.getBearingRadians()
+                // Subtract current radar heading to get turn required
+                - getRadarHeadingRadians();
 
-        // If we don't have a target, well, now we do!
-        if (trackName == null) {
-            trackName = e.getName();
-            out.println("Tracking " + trackName);
-        }
-        // This is our target.  Reset count (see the run method)
-        count = 0;
-        // If our target is too far away, turn and move toward it.
-        if (e.getDistance() > 150) {
-            gunTurnAmt = normalRelativeAngleDegrees(e.getBearing() + (getHeading() - getRadarHeading()));
+        setTurnRadarRightRadians(Utils.normalRelativeAngle(radarTurn));
 
-            turnGunRight(gunTurnAmt); // Try changing these to setTurnGunRight,
-            turnRight(e.getBearing()); // and see how much Tracker improves...
-            // (you'll have to make Tracker an AdvancedRobot)
-            ahead(e.getDistance() - 140);
-            return;
-        }
-
-        // Our target is close.
-        gunTurnAmt = normalRelativeAngleDegrees(e.getBearing() + (getHeading() - getRadarHeading()));
-        turnGunRight(gunTurnAmt);
-        fire(3);
-
-        // Our target is too close!  Back up.
-        if (e.getDistance() < 100) {
-            if (e.getBearing() > -90 && e.getBearing() <= 90) {
-                back(40);
-            } else {
-                ahead(40);
-            }
-        }
-        scan();
+        // ...
     }
 
     /**
      * onHitRobot: Set him as our new target
      */
-    public void onHitRobot(HitRobotEvent e) {
+    /*public void onHitRobot(HitRobotEvent e) {
         // Only print if he's not already our target.
         if (trackName != null && !trackName.equals(e.getName())) {
             out.println("Tracking " + e.getName() + " due to collision");
@@ -111,11 +76,13 @@ public class RustyTrumpet extends AdvancedRobot {
         turnGunRight(gunTurnAmt);
         fire(3);
         back(50);
-    }
-
+    }*/
     /**
      * onWin: Do a victory dance
+     *
+     * @param e
      */
+    @Override
     public void onWin(WinEvent e) {
         for (int i = 0; i < 50; i++) {
             turnRight(30);
