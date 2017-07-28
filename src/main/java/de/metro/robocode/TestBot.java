@@ -2,7 +2,7 @@ package de.metro.robocode;
 
 import robocode.*;
 
-public class TestBot extends Robot {
+public class TestBot extends AdvancedRobot {
 
     @Override
     public void run() {
@@ -12,16 +12,22 @@ public class TestBot extends Robot {
 
         while (true) {
             ahead(radius);
-            turnLeft(angle);
+            //turnLeft(angle);
             turnGunLeft(angle);
             fireBullet(getEnergy());
+            for(HitWallEvent e : getHitWallEvents()){
+                System.out.println(e.toString());
+                clearAllEvents();
+            }
         }
+        
     }
 
+    @Override
     public void onScannedRobot(ScannedRobotEvent e) {
         fire(1);
     }
-
+    
     public void onHitByBullet(HitByBulletEvent e) {
         turnLeft(90 - e.getBearing());
     }
