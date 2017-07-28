@@ -64,7 +64,8 @@ public class RustyTrumpet extends AdvancedRobot {
                 - getRadarHeadingRadians();
 
         setTurnGunRightRadians(Utils.normalRelativeAngle(radarTurn));
-        setFire(1);
+        if(e.getDistance() < 400)
+        setFire(0.5);
 
         // ...
     }
