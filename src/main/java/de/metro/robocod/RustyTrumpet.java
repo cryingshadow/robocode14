@@ -34,6 +34,8 @@ public class RustyTrumpet extends AdvancedRobot {
                     } else {
                         setTurnRadarLeft(360);
                     }
+                    
+                    happyFeet();
                     break;
             }
             
@@ -88,6 +90,11 @@ public class RustyTrumpet extends AdvancedRobot {
             turnRight(30);
             turnLeft(30);
         }
+    }
+
+    private void happyFeet() {
+        double x = getX(),
+                y = getY();
     }
 
 }
