@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.metro.robocode</groupId>
+    <groupId>de.metro.robocod</groupId>
         <!--
             Set this to your robot's name
         -->
-    <artifactId>Robot14</artifactId>
+    <artifactId>Robot14b</artifactId>
         <!--
             Set this to your robot's current version
         -->
